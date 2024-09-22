@@ -1,0 +1,84 @@
+#!/bin/bash
+
+HOSTS_FILE="/etc/hosts"
+BACKUP_FILE="/etc/hosts.deepwork.bak"
+BLOCK_MARKER="# DEEPWORK BLOCK"
+
+# Updated list of websites to block
+WEBSITES=(
+    "x.com"
+    "reddit.com"
+    "youtube.com"
+    "news.ycombinator.com"
+    "svt.se"
+)
+
+# Function to block websites
+block_websites() {
+    # Check if already in DeepWork mode
+    if grep -q "$BLOCK_MARKER" "$HOSTS_FILE"; then
+        echo "DeepWork mode is already active."
+        return
+    fi
+
+    # Backup the original hosts file
+    sudo cp "$HOSTS_FILE" "$BACKUP_FILE"
+
+    # Add block marker and website entries to hosts file
+    echo "$BLOCK_MARKER" | sudo tee -a "$HOSTS_FILE" > /dev/null
+    for site in "${WEBSITES[@]}"; do
+        echo "0.0.0.0 $site" | sudo tee -a "$HOSTS_FILE" > /dev/null
+        echo "0.0.0.0 www.$site" | sudo tee -a "$HOSTS_FILE" > /dev/null
+    done
+
+    apply_changes
+
+    echo "Websites blocked. DeepWork mode activated!"
+}
+
+# Function to unblock websites
+unblock_websites() {
+    # Check if in DeepWork mode
+    if ! grep -q "$BLOCK_MARKER" "$HOSTS_FILE"; then
+        echo "DeepWork mode is not active."
+        return
+    fi
+
+    # Restore the original hosts file
+    if [ -f "$BACKUP_FILE" ]; then
+        sudo mv "$BACKUP_FILE" "$HOSTS_FILE"
+    else
+        # If no backup file exists, remove the blocked entries
+        sudo sed -i '' "/$BLOCK_MARKER/,\$d" "$HOSTS_FILE"
+    fi
+
+    apply_changes
+
+    echo "Websites unblocked. DeepWork mode deactivated."
+}
+
+# Function to apply changes and flush caches
+apply_changes() {
+    # Flush DNS cache
+    sudo dscacheutil -flushcache
+    sudo killall -HUP mDNSResponder
+
+    # Restart the network interface to ensure changes take effect
+    sudo ifconfig en0 down && sudo ifconfig en0 up
+}
+
+# Main script logic
+case "$1" in
+    "stop")
+        unblock_websites
+        ;;
+    "")
+        block_websites
+        ;;
+    *)
+        echo "Usage: $0 [stop]"
+        echo "  Run without arguments to block websites and start DeepWork mode"
+        echo "  Run with 'stop' to unblock websites and end DeepWork mode"
+        exit 1
+        ;;
+esac
