@@ -15,9 +15,9 @@ WEBSITES=(
 
 # Function to block websites
 block_websites() {
-    # Check if already in DeepWork mode
+    # Check if already in Deep work mode
     if grep -q "$BLOCK_MARKER" "$HOSTS_FILE"; then
-        echo "DeepWork mode is already active."
+        echo "Deep work mode is already active."
         return
     fi
 
@@ -33,14 +33,14 @@ block_websites() {
 
     apply_changes
 
-    echo "Websites blocked. DeepWork mode activated!"
+    echo "Websites blocked. Deep work mode activated!"
 }
 
 # Function to unblock websites
 unblock_websites() {
-    # Check if in DeepWork mode
+    # Check if in Deep work mode
     if ! grep -q "$BLOCK_MARKER" "$HOSTS_FILE"; then
-        echo "DeepWork mode is not active."
+        echo "Deep work mode is not active."
         return
     fi
 
@@ -54,7 +54,7 @@ unblock_websites() {
 
     apply_changes
 
-    echo "Websites unblocked. DeepWork mode deactivated."
+    echo "Websites unblocked. Deep work mode deactivated."
 }
 
 # Function to apply changes and flush caches
@@ -77,8 +77,9 @@ case "$1" in
         ;;
     *)
         echo "Usage: $0 [stop]"
-        echo "  Run without arguments to block websites and start DeepWork mode"
-        echo "  Run with 'stop' to unblock websites and end DeepWork mode"
+        echo "  Run without arguments to block websites and start Deep work mode"
+        echo "  Run with 'stop' to unblock websites and end Deep work mode"
         exit 1
         ;;
 esac
+
