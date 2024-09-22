@@ -1,6 +1,6 @@
 # Deep Work Mode
 
-A simple bash script to boost productivity by blocking distracting websites.
+A simple bash script to boost productivity by blocking distracting websites, inspired by Cal Newport's concept of "[Deep Work](https://www.amazon.se/Deep-Work-Focused-Success-Distracted/dp/1455586692)".
 
 ## Features
 
